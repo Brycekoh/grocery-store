@@ -200,7 +200,7 @@ python --version  # Python 3.10+
 ```bash
 # Clone the repository
 git clone https://github.com/Brycekoh/grocery-store.git
-cd grocery-store/grocery_store-main/grocery_store-main
+cd grocery-store
 
 # Create virtual environment
 python -m venv venv
@@ -215,6 +215,12 @@ pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
 ```
+
+### **Seed Sample Data**
+```bash
+python manage.py seed
+```
+> Populates the database with 8 categories, 24 products, 3 stores (with opening hours), and randomized inventory across all stores. Use `--clear` to reset before seeding.
 
 ### **Create Admin User**
 ```bash
