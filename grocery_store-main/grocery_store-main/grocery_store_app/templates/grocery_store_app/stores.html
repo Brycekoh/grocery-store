@@ -1,0 +1,67 @@
+{% extends "grocery_store_app/layout.html" %}
+
+{% block body %}
+<div class="container my-4">
+  <h2 class="mb-4 text-center">Our Stores</h2>
+  
+  <!-- Find Closest Store Form -->
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-6">
+      <!-- Django form for user to enter postcode-->
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary w-100">Find My Closest Store</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Display closest store if available -->
+  {% if closest_store %}
+  <div class="alert alert-success text-center">
+    <strong>Your closest store is:</strong><br>
+    {{ closest_store.name }} ({{ distance_km }} km away)
+  </div>
+  {% endif %}
+
+  <!-- Store Cards -->
+  <div class="row gy-4">
+    {% for store in stores %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <!--Store Name-->
+          <h5 class="card-title fw-bold">{{ store.name }}</h5>
+          
+          <!--Store address with google Maps link-->
+          <p class="mb-1">
+            <strong>Address: </strong><a href="https://www.google.com/maps/search/?api=1&query={{ store.address|urlencode }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">{{ store.address }}</a>
+          </p>
+          
+          <!--Store phone number with link-->
+          <p class="mb-1">
+            <strong>Phone: </strong><a href="tel:{{ store.phone_number }}" class="text-decoration-none">{{ store.phone_number }}</a>
+          </p>
+          
+          <!--Store opening hours-->
+          {% if store.hours %}
+            <div class="card-text text-muted small">
+              <strong>Opening Hours:</strong><br>
+                Mon: {{ store.hours.monday_open|time:"g:i A" }} – {{ store.hours.monday_close|time:"g:i A" }}<br>
+                Tue: {{ store.hours.tuesday_open|time:"g:i A" }} – {{ store.hours.tuesday_close|time:"g:i A" }}<br>
+                Wed: {{ store.hours.wednesday_open|time:"g:i A" }} – {{ store.hours.wednesday_close|time:"g:i A" }}<br>
+                Thu: {{ store.hours.thursday_open|time:"g:i A" }} – {{ store.hours.thursday_close|time:"g:i A" }}<br>
+                Fri: {{ store.hours.friday_open|time:"g:i A" }} – {{ store.hours.friday_close|time:"g:i A" }}<br>
+                Sat: {{ store.hours.saturday_open|time:"g:i A" }} – {{ store.hours.saturday_close|time:"g:i A" }}<br>
+                Sun: {{ store.hours.sunday_open|time:"g:i A" }} – {{ store.hours.sunday_close|time:"g:i A" }}
+            </div>
+          {% else %}
+            <p class="card-text text-muted"><em>Hours not set.</em></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

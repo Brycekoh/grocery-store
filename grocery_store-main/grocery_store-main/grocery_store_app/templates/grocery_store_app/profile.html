@@ -1,0 +1,230 @@
+{% extends "grocery_store_app/layout.html" %}
+
+{% block title %}Profile - Grocery Store{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+  <div class="row">
+    <!-- Left Column - Orders -->
+    <div class="col-md-6">
+
+      <!-- Active Orders Section -->
+      <div class="card shadow mb-4">
+        <div class="card-header bg-warning text-dark">
+          <h4 class="mb-0">Active Orders</h4>
+        </div>
+        
+        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+    
+          {% if active_error %}
+            <div class="alert alert-danger text-center">
+              <strong>We couldn’t retrieve your active orders.</strong><br>Please try again later.
+            </div>
+          {% elif active_orders %}
+            {% for order in active_orders %}
+              <div class="border-bottom pb-2 mb-2">
+                <div class="row">
+                  <div class="col-8">
+                    <strong><a href="{% url 'order_detail' order.id %}">Order #{{ order.id }}</a></strong></br>
+                    <small class="text-muted">{{ order.created_at|date:"M d, Y" }} </br>
+                    {% if order.items.first.per_store_product %}
+                      Fulfilled by: {{ order.items.first.per_store_product.store.name }}
+                    {% else %}
+                      Fulfilled by: Unknown
+                    {% endif %}
+                    </small>
+                  </div>
+                  <div class="col-4 text-end">
+                    <span class="badge bg-warning">${{ order.total }}</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center text-muted">
+              <p>No active orders</p>
+              <a href="{% url 'products' %}" class="btn btn-outline-warning">Start Shopping</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Past Orders Section -->
+      <div class="card shadow mb-4">
+        <div class="card-header bg-secondary text-white">
+          <h4 class="mb-0">Past Orders</h4>
+        </div>
+        
+        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+
+          {% if past_error %}
+            <div class="alert alert-danger text-center">
+              <strong>We couldn’t retrieve your past orders.</strong><br>Please try again later.
+            </div>
+          {% elif past_orders %}
+            {% for order in past_orders|slice:":5" %}
+              <div class="border-bottom pb-2 mb-2">
+                <div class="row">
+                  <div class="col-8">
+                    <strong><a href="{% url 'order_detail' order.id %}">Order #{{ order.id }}</a></strong></br>
+                    <small class="text-muted">{{ order.created_at|date:"M d, Y" }}
+                    {% if order.items.first.per_store_product %}
+                      Fulfilled by: {{ order.items.first.per_store_product.store.name }}
+                    {% else %}
+                      Fulfilled by: Unknown
+                    {% endif %}
+                    </small>
+                  </div>
+                  <div class="col-4 text-end">
+                    <span class="badge bg-success">${{ order.total }}</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+            <div class="text-center mt-3">
+              <a href="#" class="btn btn-outline-secondary btn-sm">View All Orders</a>
+            </div>
+          {% else %}
+
+            <div class="text-center text-muted">
+              <p>No past orders</p>
+              <small>Your completed orders will appear here</small>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Admin Access Section -->
+      {% if user.is_staff or user.is_superuser %}
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Administrator Access</h4>
+        </div>
+        
+        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+          <div class="text-center mb-3">
+            <h5 class="text-primary">Admin Dashboard</h5>
+            <p class="text-muted">Access the custom admin dashboard to manage users, create admin accounts, and monitor order status.</p>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">
+              <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+            </a>
+          </div>
+          
+          <hr>
+          
+          <div class="text-center">
+            <h6 class="text-primary mb-2">Your Privileges</h6>
+            {% if user.is_superuser %}
+              <span class="badge bg-danger mb-2">Super Administrator</span><br>
+              <small class="text-muted">
+                Full system access • User management • Content management • System configuration
+              </small>
+            {% elif user.is_staff %}
+              <span class="badge bg-warning mb-2">Staff Member</span><br>
+              <small class="text-muted">
+                Admin interface access • Content management • Limited user management
+              </small>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column - Profile & Payment -->
+    <div class="col-md-6">
+      <!-- User Profile Section -->
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">User Profile</h4>
+        </div>
+        
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-4"><strong>Username:</strong></div>
+            <div class="col-8">{{ user.username }}</div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-4"><strong>Email:</strong></div>
+            <div class="col-8">{{ user.email }}</div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-4"><strong>First Name:</strong></div>
+            <div class="col-8">{{ user.first_name|default:"Not provided" }}</div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-4"><strong>Last Name:</strong></div>
+            <div class="col-8">{{ user.last_name|default:"Not provided" }}</div>
+          </div>
+          
+          <div class="row">
+            <div class="col-4"><strong>Member Since:</strong></div>
+            <div class="col-8">{{ user.date_joined|date:"M d, Y" }}</div>
+          </div>
+        </div>
+        
+        <div class="card-footer text-center">
+          <a href="{% url 'edit_profile' %}" class="btn btn-primary me-2">
+            Edit Personal Details
+          </a>
+          <a href="{% url 'logout' %}" class="btn btn-danger" 
+             onclick="return confirm('Are you sure you want to log out?')">
+            Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- Payment Details Section -->
+      <div class="card shadow">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0">Payment Details</h4>
+        </div>
+        
+        <div class="card-body">
+          {% if user.payment_set.first %}
+            {% with payment=user.payment_set.first %}
+              <div class="row mb-3">
+                <div class="col-4"><strong>Card Number:</strong></div>
+                <div class="col-8">**** **** **** {{ payment.card_number|stringformat:"s"|slice:"-4:" }}</div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-4"><strong>Expiration:</strong></div>
+                <div class="col-8">{{ payment.expiration_month|stringformat:"02d" }}/{{ payment.expiration_year }}</div>
+              </div>
+              
+              <div class="row">
+                <div class="col-4"><strong>CVC:</strong></div>
+                <div class="col-8">***</div>
+              </div>
+            {% endwith %}
+          {% else %}
+            <div class="text-center text-muted">
+              <p>No payment method on file</p>
+              <a href="{% url 'add_payment' %}" class="btn btn-outline-success">Add Payment Method</a>
+            </div>
+          {% endif %}
+        </div>
+        
+        {% if user.payment_set.first %}
+        <div class="card-footer text-center">
+          <a href="{% url 'edit_payment' %}" class="btn btn-warning me-2">
+            Edit Payment Details
+          </a>
+          <form method="post" action="{% url 'remove_payment' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" 
+                    onclick="return confirm('Are you sure you want to remove this payment method?')">
+              Remove Payment Method
+            </button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
